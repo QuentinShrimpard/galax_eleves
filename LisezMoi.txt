@@ -1,0 +1,34 @@
+HONHONHON
+./bin/galax --display NO --core CPU_FAST --validate
+./bin/galax --display NO --core GPU
+
+
+
+rm -rf build/*
+cd build
+
+PUIS
+
+cmake -DCMAKE_CXX_COMPILER=clang++ \
+      -DCMAKE_CXX_FLAGS="-march=native -ffast-math" \
+      -DGALAX_LINK_OMP=ON \
+      ..
+OU 
+
+    cmake  -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=native" .. # configure project with cmake, using Release build and native arch
+    make -j # compile the project
+
+PUIS
+
+cd build
+cmake -DGALAX_LINK_OMP=ON ..
+
+OU 
+
+    cmake -DGALAX_LINK_CUDA=ON -DCUDA_TOOLKIT_ROOT_DIR="/usr" ..
+    make -j
+    ./bin/galax -c GPU # use GPU version
+
+PUIS 
+
+make -j

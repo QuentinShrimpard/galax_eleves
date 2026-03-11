@@ -1,6 +1,8 @@
+
 #include <cmath>
 
 #include "Model_CPU.hpp"
+
 
 Model_CPU
 ::Model_CPU(const Initstate& initstate, Particles& particles)
@@ -11,7 +13,7 @@ Model_CPU
   accelerationsx(n_particles),
   accelerationsy(n_particles),
   accelerationsz(n_particles)
-{
+{   
 	for (int i = 0; i < n_particles; i++)
 	{
 		particles.x[i] = initstate.positionsx[i];

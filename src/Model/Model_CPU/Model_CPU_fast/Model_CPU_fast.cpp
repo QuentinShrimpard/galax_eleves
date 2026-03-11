@@ -8,7 +8,7 @@
 #include <omp.h>
 
 namespace xs = xsimd;
-using b_type = xs::batch<float, xs::avx2>;
+using b_type = xs::batch<float, xs::avx2>; 
 
 Model_CPU_fast
 ::Model_CPU_fast(const Initstate& initstate, Particles& particles)
@@ -24,10 +24,59 @@ void Model_CPU_fast
     std::fill(accelerationsz.begin(), accelerationsz.end(), 0);
 
 // OMP  version
-// #pragma omp parallel for
-//     for (int i = 0; i < n_particles; i ++)
-//     {
-//     }
+    #pragma omp parallel for
+    for (int i = 0; i < n_particles; i++)
+	{   
+        // #pragma omp parallel for
+		for (int j = 0; j < n_particles; j++)
+		{
+			if(i != j)
+			{
+				const float diffx = particles.x[j] - particles.x[i];
+				const float diffy = particles.y[j] - particles.y[i];
+				const float diffz = particles.z[j] - particles.z[i];
+
+				float dij = diffx * diffx + diffy * diffy + diffz * diffz;
+
+				if (dij < 1.0)
+				{
+					dij = 10.0;
+				}
+				else
+				{
+					dij = std::sqrt(dij);
+					dij = 10.0 / (dij * dij * dij);
+				}
+
+				accelerationsx[i] += diffx * dij * initstate.masses[j];
+				accelerationsy[i] += diffy * dij * initstate.masses[j];
+				accelerationsz[i] += diffz * dij * initstate.masses[j];
+			}
+		}
+	}
+
+    // auto vx = xs::load_unaligned(&velocitiesx);
+    // auto vy = xs::load_unaligned(&velocitiesy);
+    // auto vz = xs::load_unaligned(&velocitiesz);
+    // auto ax = xs::load_unaligned(&accelerationsx);
+    // auto ay = xs::load_unaligned(&accelerationsy);
+    // auto az = xs::load_unaligned(&accelerationsz);
+	for (int i = 0; i < n_particles; i++)
+	{
+        // auto outx = vx + ax * 2.0f;
+        // auto outy = vy + ay * 2.0f;
+        // auto outz = vz + az * 2.0f;
+		velocitiesx[i] += accelerationsx[i] * 2.0f;
+		velocitiesy[i] += accelerationsy[i] * 2.0f;
+		velocitiesz[i] += accelerationsz[i] * 2.0f;
+		particles.x[i] += velocitiesx   [i] * 0.1f;
+		particles.y[i] += velocitiesy   [i] * 0.1f;
+		particles.z[i] += velocitiesz   [i] * 0.1f;
+        // particles.x[i] += outx[i] * 0.1f;
+        // particles.y[i] += outy[i] * 0.1f;   
+        // particles.z[i] += outz[i] * 0.1f;
+	}
+}
 
 
 // OMP + xsimd version
@@ -45,6 +94,5 @@ void Model_CPU_fast
 //         ...
 //     }
 
-}
 
 #endif // GALAX_MODEL_CPU_FAST
