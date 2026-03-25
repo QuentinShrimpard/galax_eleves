@@ -2,7 +2,7 @@ HONHONHON
 ./bin/galax --display NO --core CPU_FAST --validate
 ./bin/galax --display NO --core GPU
 
-
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=native" -DGALAX_LINK_CUDA=ON -DCMAKE_CUDA_FLAGS="-O3 --use_fast_math -arch=sm_61" ..
 
 rm -rf build/*
 cd build
