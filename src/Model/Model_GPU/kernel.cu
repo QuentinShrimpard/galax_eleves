@@ -119,8 +119,8 @@ __global__ void compute_acc_old(float4 * positionsGPU, float4 * accelerationsGPU
 			float test2 = fmaf(diffy, diffy, test1);
 			float dij = fmaf(diffx, diffx, test2);
 
-			dij = fmaxf(dij, 1.0f);
-			dij = 10.0f * rsqrtf(dij * dij * dij);
+			dij = std::sqrt(fmaxf(dij, 1.0f));
+			dij = 10.0 / (dij * dij * dij);
 
 			float fiona = dij * temp.w;
 			a.x = fmaf(diffx, fiona, a.x);
@@ -220,7 +220,7 @@ void update_position_cu(float4* positionsGPU, float4* velocitiesGPU, float4* acc
 	int nthreads = BLOCK_SIZE;
 	int nblocks =  (n_particles + (nthreads -1)) / nthreads;
 
-	compute_acc_old<<<nblocks, nthreads>>>(positionsGPU, accelerationsGPU, n_particles);
+	compute_acc23t1oie<<<nblocks, nthreads>>>(positionsGPU, accelerationsGPU, n_particles);
 	maj_pos    <<<nblocks, nthreads>>>(positionsGPU, velocitiesGPU, accelerationsGPU, n_particles);
 	// int nthreads = BLOCK_SIZE;
 	// int nblocks =  (n_particles + (nthreads -1)) / nthreads;
@@ -238,10 +238,7 @@ void update_position_cu(float4* positionsGPU, float4* velocitiesGPU, float4* acc
     // float milliseconds = 0;
     // cudaEventElapsedTime(&milliseconds, start, stop);
     
-    // // Affiche le temps (et calcule le vrai FPS "théorique" du GPU)
-	// printf("milliseconds %f\n", milliseconds);
-	// printf("fps %f\n", 1000.0f/milliseconds);
-    // // std::cout << "Temps Kernel: " << milliseconds << " ms (" << 1000.0f/milliseconds << " FPS GPU)" << std::endl;
+	// printf("FPS GPU PUR %f\n", 1000.0f/milliseconds);
 
     // cudaEventDestroy(start);
     // cudaEventDestroy(stop);
