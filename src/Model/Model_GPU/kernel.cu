@@ -14,11 +14,6 @@ __global__ void compute_acc(float4 * positionsGPU, float4 * accelerationsGPU, in
 		{
 			return;
 		}
-
-		//cétéici, on gagne une dizaine de fps à le faire ici
-		// accelerationsGPU[i].x = 0.0f;
-		// accelerationsGPU[i].y = 0.0f; 
-		// accelerationsGPU[i].z = 0.0f;
 	
 		float3 a;
 		a.x = 0.0f;
@@ -136,6 +131,7 @@ __global__ void compute_acc_old(float4 * positionsGPU, float4 * accelerationsGPU
 	accelerationsGPU[i] = a;
 }
 
+// c'est celui là le bon
 __global__ void compute_acc23t1oie(float4 * positionsGPU, float4 * accelerationsGPU, int n_particles)
 {   
     __shared__ float4 posMass[BLOCK_SIZE]; 
